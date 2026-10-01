@@ -10,3 +10,5 @@ torch
 accelerate
 fpdf
 Pillow
+pydantic
+pydantic-settings
