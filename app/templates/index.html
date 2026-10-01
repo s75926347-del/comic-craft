@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html><head><title>ComicCraft</title>
+<style>body{font-family:Arial;background:#f0f0f0;padding:40px}.box{max-width:600px;margin:auto;background:white;padding:30px;border-radius:10px} input,select,textarea{width:100%;padding:10px;margin:8px 0} button{width:100%;padding:12px;background:#6c5ce7;color:white;border:none;border-radius:5px}</style>
+</head><body>
+<div class="box">
+<h1>🎨 ComicCraft - AI Comic Creator</h1>
+<form action="/generate" method="post">
+<label>Story Prompt</label><textarea name="story_prompt" placeholder="A brave fox exploring an enchanted forest" required></textarea>
+<label>Character Name</label><input name="character_name" placeholder="Mr.Foxy" required>
+<label>Setting</label><select name="setting"><option>forest</option><option>city</option><option>school</option><option>space</option></select>
+<label>Tone</label><select name="tone"><option>funny</option><option>dramatic</option><option>light-hearted</option><option>poetic</option></select>
+<label>Art Style</label><select name="art_style"><option>comic book</option><option>anime</option><option>pixel art</option><option>realistic</option></select>
+<button type="submit">Generate Comic</button>
+</form>
+</div></body></html>

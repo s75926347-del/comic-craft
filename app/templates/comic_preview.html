@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html><head><title>Comic Preview</title>
+<style>body{font-family:Arial;background:#fff;padding:20px}.panel{border:2px solid #000;margin:20px auto;max-width:600px;padding:15px;border-radius:10px} img{width:100%;border-radius:5px} .btn{display:block;width:200px;margin:20px auto;padding:12px;background:green;color:white;text-align:center;text-decoration:none;border-radius:5px}</style>
+</head><body>
+<h1 style="text-align:center">🎉 Comic Generated for {{ character_name }}!</h1>
+{% for p in layout %}
+<div class="panel">
+<h2>{{ p.title }}</h2>
+<img src="/{{ p.image_path }}" alt="panel">
+<p><i>Scene: {{ p.description }}</i></p>
+<p><b>Dialogue:</b> {{ p.dialogue }}</p>
+</div>
+{% endfor %}
+<a href="/{{ pdf_path }}" class="btn" target="_blank">📥 Download PDF</a>
+<a href="/" class="btn" style="background:#6c5ce7">Go Create Another Comic</a>
+</body></html>
