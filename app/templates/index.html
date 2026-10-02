@@ -1,62 +1,48 @@
 <!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ComicCraft LIVE</title>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ComicCraft 5 Panels</title>
 <style>
-body{font-family:Arial;background:#0f0f0f;color:white;padding:20px;margin:0}
-.container{max-width:900px;margin:0 auto}
+body{font-family:Arial;background:#0f0f0f;color:white;padding:15px;margin:0}
+.container{max-width:1100px;margin:0 auto}
 h1{color:#ff6b35;text-align:center}
 .card{background:#1e1e1e;padding:20px;border-radius:12px;margin:20px 0;border:1px solid #333}
-.btn{background:#ff6b35;color:white;padding:14px 24px;border:none;border-radius:8px;cursor:pointer;width:100%;font-weight:bold;font-size:16px}
+.btn{background:#ff6b35;color:white;padding:14px;border:none;border-radius:8px;cursor:pointer;width:100%;font-weight:bold;font-size:18px}
 .btn:hover{background:#e55a2b}
-input{width:100%;padding:12px;background:#2a2a2a;color:white;border:1px solid #444;border-radius:8px;box-sizing:border-box}
-.success{color:#4caf50;text-align:center;font-weight:bold;font-size:18px}
+input{width:100%;padding:14px;background:#2a2a2a;color:white;border:1px solid #444;border-radius:8px;box-sizing:border-box;font-size:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;margin-top:20px}
+.panel{background:#2a2a2a;border-radius:12px;overflow:hidden;border:1px solid #444}
+.panel img{width:100%;height:350px;object-fit:cover;display:block}
+.panel p{padding:12px;margin:0;font-size:14px;line-height:1.4}
+.badge{background:#ff6b35;color:white;padding:4px 10px;border-radius:20px;font-size:12px;position:absolute;margin:8px;font-weight:bold}
+.img-wrap{position:relative}
+.success{color:#4caf50;text-align:center;font-weight:bold}
 a{color:#ff6b35;text-decoration:none}
-a:hover{text-decoration:underline}
-.panel{background:#2a2a2a;padding:15px;margin:15px 0;border-radius:10px}
-.panel img{max-width:100%;border-radius:8px;margin-top:10px}
 </style>
 </head><body><div class="container">
-<h1>🚀 ComicCraft LIVE - FIXED 420</h1>
-<p class="success">✅ Template Fixed! Working!</p>
-
+<h1>🚀 ComicCraft - 5 PANEL COMIC</h1>
+<p class="success">✅ 5 Panel + Real AI Pic Ready!</p>
 <div class="card">
-<h2>Generate Comic</h2>
-<input id="prompt" placeholder="Ex: Brave fox learns cyber security in jungle">
+<input id="prompt" placeholder="Ex: a brave fox exploring an enchanted forest" value="a brave fox exploring an enchanted forest">
 <br><br>
-<button class="btn" onclick="gen()">🎨 Generate Comic</button>
-<div id="r" style="margin-top:20px"></div>
+<button class="btn" onclick="gen()">🎨 Generate 5 Panel Comic</button>
+<div id="r"></div>
 </div>
-
-<div class="card" style="text-align:center">
-<a href="/docs">📚 API Docs</a> | <a href="/test-image?prompt=brave fox">🖼️ Test Image</a> | <a href="/">🔙 Home</a>
+<div class="card" style="text-align:center"><a href="/docs">📚 Docs</a> | <a href="/">Home</a></div>
 </div>
-</div>
-
 <script>
 async function gen(){
  const p=document.getElementById('prompt').value;
  if(!p){alert('Prompt podu da!');return}
- document.getElementById('r').innerHTML='<h3>⏳ Generating... 15 sec wait pannu da...</h3>';
+ document.getElementById('r').innerHTML='<h3 style="text-align:center">⏳ 5 Panel Generating... 30 sec wait pannu da... AI draw pannuthu...</h3>';
  try{
-   const fd=new FormData();
-   fd.append('prompt',p);
-   fd.append('style','cartoon comic colorful');
+   const fd=new FormData();fd.append('prompt',p);fd.append('style','cartoon comic colorful vibrant');
    const res=await fetch('/generate',{method:'POST',body:fd});
    const d=await res.json();
-   let html='<h3>✅ Generated!</h3>';
-   if(d.panels && d.panels.length>0){
-     d.panels.forEach((panel,i)=>{
-       html+=`<div class="panel"><p><b>Panel ${i+1}:</b> ${panel.text || p}</p><img src="${panel.image}" onerror="this.style.display='none'"></div>`;
-     });
-   }else if(d.images){
-     d.images.forEach((img,i)=>{
-       html+=`<div class="panel"><img src="${img}"></div>`;
-     });
-   }else{
-     html+=`<pre style="background:#000;padding:15px;white-space:pre-wrap;overflow:auto">${JSON.stringify(d,null,2)}</pre>`;
-   }
+   let html='<h3>✅ Your 5 Panel Comic Ready!</h3><div class="grid">';
+   d.panels.forEach((pl,i)=>{
+     html+=`<div class="panel"><div class="img-wrap"><span class="badge">PANEL ${i+1}</span><img src="${pl.image}" loading="lazy" onerror="this.src='https://via.placeholder.com/512x768?text=Loading+Panel+${i+1}'"></div><p>${pl.text}</p></div>`;
+   });
+   html+='</div>';
    document.getElementById('r').innerHTML=html;
- }catch(e){
-   document.getElementById('r').innerHTML='<p style="color:red">Error: '+e.message+'</p>';
- }
+ }catch(e){document.getElementById('r').innerHTML='<p style="color:red">Error: '+e.message+'</p>'}
 }
 </script></body></html>
