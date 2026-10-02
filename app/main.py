@@ -1,84 +1,83 @@
-import os
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi import Request
+import os
 
-app = FastAPI(title="ComicCraft")
+app = FastAPI(title="ComicCraft - FINAL FIXED")
 
+# Health checks
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "live": True}
 
 @app.get("/ping")
 def ping():
     return {"pong": True}
 
-# --- FIXED IMPORTS - CORRECT PATH ---
-# routes.py is at app/routes.py, not app.core.routes
-try:
-    from routes import router as main_router
-    app.include_router(main_router)
-    print("✅ Loaded: routes.router")
-except Exception as e:
-    print(f"⚠️ routes failed: {e}")
-    try:
-        from app.routes import router as main_router
-        app.include_router(main_router)
-        print("✅ Loaded: app.routes.router")
-    except Exception as e2:
-        print(f"⚠️ app.routes failed: {e2}")
+@app.get("/")
+def root():
+    return {
+        "message": "ComicCraft Live 🚀",
+        "status": "ok",
+        "docs": "/docs",
+        "test_image": "/test-image?prompt=brave fox",
+        "ui": "/ui"
+    }
 
-# Also try services
+# Test image - CHECK PURPLE POYACHA
+@app.get("/test-image")
+def test_image(prompt: str = "brave fox in forest"):
+    from app.ai.image_generator import generate_comic_image
+    url = generate_comic_image(prompt)
+    return {"prompt": prompt, "image_url": url, "note": "If image is not purple, FIXED!"}
+
+# Try to load templates safely
 try:
-    from services.comic_service import router as service_router
-    app.include_router(service_router)
+    templates = Jinja2Templates(directory="app/templates")
 except:
-    pass
+    templates = None
 
-# Templates & Static
 try:
     app.mount("/static", StaticFiles(directory="app/static"), name="static")
 except:
-    try:
-        app.mount("/static", StaticFiles(directory="static"), name="static")
-    except:
-        pass
-
-templates = None
-try:
-    from fastapi.templating import Jinja2Templates
-    templates = Jinja2Templates(directory="app/templates")
-except:
     pass
 
-@app.get("/")
-def root(request: Request = None):
-    # Try to serve UI
-    try:
-        if templates:
+@app.get("/ui", response_class=HTMLResponse)
+def ui(request: Request):
+    if templates:
+        try:
             return templates.TemplateResponse("index.html", {"request": request})
-    except:
-        pass
-    try:
-        return FileResponse("app/templates/index.html")
-    except:
-        return {"message": "ComicCraft Live 🚀", "status": "ok", "go_to": "/docs"}
+        except Exception as e:
+            return HTMLResponse(f"""
+            <html><body style="font-family:sans-serif; padding:40px">
+            <h1>ComicCraft 🚀 LIVE</h1>
+            <p>Template error: {e}</p>
+            <a href='/docs'>Go to API Docs</a><br><br>
+            <a href='/test-image?prompt=fox'>Test Image (No Purple)</a>
+            </body></html>
+            """)
+    return HTMLResponse("""
+    <html><body style="font-family:sans-serif; padding:40px">
+    <h1>ComicCraft 🚀 LIVE</h1>
+    <p>API is Working!</p>
+    <a href='/docs'>API Docs</a><br><br>
+    <a href='/test-image?prompt=brave fox'>Test Fox Image - No Purple Check</a>
+    </body></html>
+    """)
 
-@app.get("/ui")
-def ui(request: Request = None):
-    try:
-        if templates:
-            return templates.TemplateResponse("index.html", {"request": request})
-    except:
-        pass
-    return {"message": "API Live, UI template not found, but /docs works"}
+# Load your existing routes SAFELY - No crash
+try:
+    from app.routes import router as app_router
+    app.include_router(app_router)
+    print("✅ Loaded app.routes")
+except Exception as e:
+    print(f"Note: app.routes not loaded: {e}")
 
-# Direct image gen test
-from app.ai.image_generator import generate_comic_image
-
-@app.get("/test-image")
-def test_image(prompt: str = "brave fox"):
-    url = generate_comic_image(prompt)
-    return {"prompt": prompt, "image_url": url}
+# Also load comic service if exists
+try:
+    from app.services.comic_service import router as comic_router
+    app.include_router(comic_router)
+    print("✅ Loaded comic_service")
+except:
+    pass
