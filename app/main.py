@@ -1,23 +1,29 @@
 from fastapi import FastAPI
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles  
-from app.routes import router
-from app.config import get_settings
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from fastapi import Request
+import os
 
-settings = get_settings()
+app = FastAPI()
 
-app = FastAPI(
-    title="ComicCraft API",
-    description="AI Comic Story Creator",
-    version="1.0.0",
-)
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Include routes
-app.include_router(router)
-
-templates = Jinja2Templates(directory="app/templates")
+# Fix for Render HEAD health check
+@app.api_route("/", methods=["GET", "HEAD"])
+async def root(request: Request):
+    return FileResponse("app/templates/index.html")
 
 @app.get("/health")
-def health():
+@app.head("/health")
+async def health():
     return {"status": "ok"}
+
+# Mount static
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="app/templates")
+
+# Import routers if you have
+try:
+    from app.routes import comic
+    app.include_router(comic.router)
+except Exception as e:
+    print(f"Router load failed: {e}")
