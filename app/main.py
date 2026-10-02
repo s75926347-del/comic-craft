@@ -1,83 +1,33 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 import os
 
-app = FastAPI(title="ComicCraft - FINAL FIXED")
+from app.routes import router
 
-# Health checks
-@app.get("/health")
-def health():
-    return {"status": "ok", "live": True}
+app = FastAPI(title="ComicCraft", version="1.0")
 
-@app.get("/ping")
-def ping():
-    return {"pong": True}
+app.include_router(router)
 
 @app.get("/")
-def root():
+async def root():
     return {
         "message": "ComicCraft Live 🚀",
         "status": "ok",
         "docs": "/docs",
-        "test_image": "/test-image?prompt=brave fox",
-        "ui": "/ui"
+        "ui": "/ui",
+        "test_image": "/test-image?prompt=brave fox"
     }
 
-# Test image - CHECK PURPLE POYACHA
-@app.get("/test-image")
-def test_image(prompt: str = "brave fox in forest"):
-    from app.ai.image_generator import generate_comic_image
-    url = generate_comic_image(prompt)
-    return {"prompt": prompt, "image_url": url, "note": "If image is not purple, FIXED!"}
-
-# Try to load templates safely
-try:
-    templates = Jinja2Templates(directory="app/templates")
-except:
-    templates = None
-
-try:
-    app.mount("/static", StaticFiles(directory="app/static"), name="static")
-except:
-    pass
-
+# FIXED UI ROUTE - NO JINJA ERROR!
 @app.get("/ui", response_class=HTMLResponse)
-def ui(request: Request):
-    if templates:
-        try:
-            return templates.TemplateResponse("index.html", {"request": request})
-        except Exception as e:
-            return HTMLResponse(f"""
-            <html><body style="font-family:sans-serif; padding:40px">
-            <h1>ComicCraft 🚀 LIVE</h1>
-            <p>Template error: {e}</p>
-            <a href='/docs'>Go to API Docs</a><br><br>
-            <a href='/test-image?prompt=fox'>Test Image (No Purple)</a>
-            </body></html>
-            """)
-    return HTMLResponse("""
-    <html><body style="font-family:sans-serif; padding:40px">
-    <h1>ComicCraft 🚀 LIVE</h1>
-    <p>API is Working!</p>
-    <a href='/docs'>API Docs</a><br><br>
-    <a href='/test-image?prompt=brave fox'>Test Fox Image - No Purple Check</a>
-    </body></html>
-    """)
-
-# Load your existing routes SAFELY - No crash
-try:
-    from app.routes import router as app_router
-    app.include_router(app_router)
-    print("✅ Loaded app.routes")
-except Exception as e:
-    print(f"Note: app.routes not loaded: {e}")
-
-# Also load comic service if exists
-try:
-    from app.services.comic_service import router as comic_router
-    app.include_router(comic_router)
-    print("✅ Loaded comic_service")
-except:
-    pass
+async def ui_page():
+    try:
+        file_path = os.path.join(os.path.dirname(__file__), "templates", "index.html")
+        # fallback check
+        if not os.path.exists(file_path):
+            file_path = os.path.join("app", "templates", "index.html")
+        with open(file_path, "r", encoding="utf-8") as f:
+            html_content = f.read()
+        return HTMLResponse(content=html_content)
+    except Exception as e:
+        return HTMLResponse(content=f"<h1>Error loading template: {e}</h1><a href='/docs'>Go to Docs</a>")
