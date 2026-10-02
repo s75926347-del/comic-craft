@@ -1,37 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ComicCraft LIVE</title>
-    <style>body{font-family: Arial; padding: 20px}</style>
+  <title>ComicCraft LIVE - FIXED</title>
 </head>
-<body>
-    <h1>ComicCraft 🚀 LIVE - FIXED</h1>
-    <a href="/docs">Go to API Docs</a><br><br>
-    <a href="/test-image">Test Image (No Purple)</a>
-    <hr>
-    <h3>Generate Comic:</h3>
-    <input type="text" id="prompt" placeholder="brave fox saves forest" style="width:300px; padding:8px">
-    <select id="style" style="padding:8px">
-        <option value="cartoon comic">cartoon comic</option>
-        <option value="anime">anime</option>
-        <option value="realistic">realistic</option>
-    </select>
-    <button onclick="generate()" style="padding:8px 15px">Generate</button>
-    
-    <div id="result" style="display:flex; gap:15px; flex-wrap:wrap; margin-top:20px"></div>
-
+<body style="font-family:Arial; padding:30px;">
+  <h1>ComicCraft 🚀 LIVE - FIXED</h1>
+  <p style="color:green; font-weight:bold;">Template error fixed! No more tuple error.</p>
+  <a href="/docs">Go to API Docs</a><br><br>
+  <a href="/test-image">Test Image (No Purple)</a>
+  <hr>
+  <input id="prompt" placeholder="Type: brave fox" style="padding:10px; width:300px;">
+  <button onclick="gen()" style="padding:10px; background:black; color:white;">Generate Comic</button>
+  <div id="r" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:20px;"></div>
 <script>
-async function generate(){
-    const prompt = document.getElementById('prompt').value;
-    const style = document.getElementById('style').value;
-    document.getElementById('result').innerHTML = 'Generating...';
-    const res = await fetch(`/generate?prompt=${encodeURIComponent(prompt)}&style=${encodeURIComponent(style)}`);
-    const data = await res.json();
-    const div = document.getElementById('result');
-    div.innerHTML = '';
-    data.panels.forEach(p => {
-        div.innerHTML += `<div style="border:1px solid #ccc; padding:10px; width:200px"><img src="${p.image}" width="200"><p>${p.text}</p></div>`;
-    });
+async function gen(){
+ let p = document.getElementById('prompt').value;
+ if(!p) return alert('prompt type pannu da');
+ document.getElementById('r').innerHTML = 'Generating... Wait 15 sec...';
+ try{
+  let res = await fetch('/generate?prompt='+encodeURIComponent(p)+'&style=cartoon comic');
+  let d = await res.json();
+  let h = '';
+  d.panels.forEach(x => {
+    h += `<div style="border:1px solid #ccc; padding:5px; width:220px;"><img src="${x.image}" width="200"><p>${x.text}</p></div>`;
+  });
+  document.getElementById('r').innerHTML = h;
+ } catch(e){
+  document.getElementById('r').innerHTML = 'Error: ' + e;
+ }
 }
 </script>
 </body>
