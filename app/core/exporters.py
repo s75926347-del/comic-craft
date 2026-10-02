@@ -1,32 +1,47 @@
-import os
 from fpdf import FPDF
-from datetime import datetime
+from PIL import Image
+import os
 
-def save_pdf(layout, filename=None):
-    if not filename:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"static/exports/comic_{timestamp}.pdf"
-
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-
+def save_pdf(layout):
     pdf = FPDF()
-    pdf.set_auto_page_break(auto=True, margin=15)
-
+    
     for panel in layout:
         pdf.add_page()
-        pdf.set_font("Arial", 'B', 16)
-        pdf.cell(0, 10, panel['title'], ln=True)
+        img_path = panel['image_path']
+        
+        # FIX: Image ah valid PNG ah maathu
+        if os.path.exists(img_path):
+            try:
+                with Image.open(img_path) as im:
+                    # RGB ku convert pannu
+                    if im.mode in ("RGBA", "P", "LA"):
+                        # White background
+                        background = Image.new("RGB", im.size, (255, 255, 255))
+                        if im.mode == "P":
+                            im = im.convert("RGBA")
+                        background.paste(im, mask=im.split()[-1] if im.mode == "RGBA" else None)
+                        im = background
+                    elif im.mode != "RGB":
+                        im = im.convert("RGB")
+                    
+                    # Force ah PNG ah save pannu
+                    im.save(img_path, "PNG")
+            except Exception as e:
+                print(f"Error fixing image {img_path}: {e}")
+        
+        try:
+            pdf.image(img_path, x=10, y=10, w=190)
+        except Exception as e:
+            print(f"PDF image add failed: {e}")
+            continue
+            
+        # Text iruntha add pannu
+        if 'text' in panel and panel['text']:
+            pdf.set_xy(10, 170)
+            pdf.set_font("Arial", size=12)
+            pdf.multi_cell(190, 10, panel['text'])
 
-        # Image
-        if os.path.exists(panel['image_path']):
-            pdf.image(panel['image_path'], x=10, w=190)
-            pdf.ln(5)
-
-        pdf.set_font("Arial", 'I', 12)
-        pdf.multi_cell(0, 10, f"Scene: {panel['description']}")
-        pdf.ln(5)
-        pdf.set_font("Arial", '', 12)
-        pdf.multi_cell(0, 10, f"Dialogue: {panel['dialogue']}")
-
-    pdf.output(filename)
-    return filename
+    pdf_path = "static/comic.pdf"
+    os.makedirs("static", exist_ok=True)
+    pdf.output(pdf_path)
+    return pdf_path
