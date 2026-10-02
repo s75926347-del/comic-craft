@@ -1,59 +1,49 @@
-from fastapi import APIRouter, Request, Form
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-
-from app.ai.gemini_flash import generate_outline
-from app.ai.gemini_pro import generate_story
-from app.ai.image_generator import generate_image
-from app.core.layout_builder import build_comic_layout
-from app.core.exporters import save_pdf
-from app.schemas import PromptRequest
+from fastapi import APIRouter, Form
+from fastapi.responses import JSONResponse
+import os
 
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates")
 
-@router.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse(request, "index.html", {"request": request})
+# Gemini setup - optional
+try:
+    import google.generativeai as genai
+    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+    gemini_model = genai.GenerativeModel("gemini-1.5-flash")
+except:
+    gemini_model = None
 
-@router.post("/generate", response_class=HTMLResponse)
-async def generate_comic(
-    request: Request,
-    story_prompt: str = Form(...),
-    character_name: str = Form(...),
-    setting: str = Form(...),
-    tone: str = Form(...),
-    art_style: str = Form(...)
-):
-    user_full_prompt = f"Story: {story_prompt}, Character: {character_name}, Setting: {setting}, Tone: {tone}"
-    panels = generate_outline(user_full_prompt)
-    story_text = generate_story(panels)
-    images = []
-    for i, p in enumerate(panels):
-        desc = p.description if hasattr(p, 'description') else str(p)
-        img_path = f"static/panels/panel_{i+1}.png"
-        saved = generate_image(desc, art_style, img_path)
-        images.append(saved)
-    layout = build_comic_layout(panels, images, story_text)
-    pdf_path = save_pdf(layout)
-    return templates.TemplateResponse(request, "comic_preview.html", {
-        "request": request, "layout": layout, "pdf_path": pdf_path, "character_name": character_name
-    })
+from app.ai.image_generator import generate_comic_image
 
-@router.post("/generate-comic/json")
-async def generate_comic_json(data: PromptRequest):
-    panels = generate_outline(data.story_prompt)
-    story_text = generate_story(panels)
-    images = [generate_image(p.description, data.art_style, f"static/panels/panel_{i+1}.png") for i, p in enumerate(panels)]
-    layout = build_comic_layout(panels, images, story_text)
-    pdf_path = save_pdf(layout)
-    return {"layout": layout, "pdf_path": pdf_path}
+@router.post("/generate")
+async def generate_comic(prompt: str = Form(...), style: str = Form("cartoon comic")):
+    try:
+        # 1. Generate story panels
+        if gemini_model:
+            try:
+                story_q = f"Break this into 4 comic panels, each 1 short sentence: {prompt}. Return like: 1) ... 2) ... 3) ... 4) ..."
+                resp = gemini_model.generate_content(story_q)
+                text = resp.text
+                # Simple split
+                panels_text = [line.strip() for line in text.split('\n') if len(line.strip()) > 10][:4]
+                if len(panels_text) < 4:
+                    panels_text = [f"{prompt} - panel {i+1}" for i in range(4)]
+            except:
+                panels_text = [f"{prompt} - panel {i+1}" for i in range(4)]
+        else:
+            panels_text = [f"{prompt} - panel {i+1}" for i in range(4)]
 
-@router.get("/test-image")
-async def test_image(prompt: str = "a brave fox in enchanted forest"):
-    path = generate_image(prompt, "comic book", "static/panels/test.png")
-    return {"image_path": path}
+        # 2. Generate images - ALL REAL IMAGES
+        result = []
+        for p_text in panels_text[:4]:
+            img_url = generate_comic_image(p_text, style)
+            result.append({"text": p_text, "image": img_url})
 
-@router.get("/export-success", response_class=HTMLResponse)
-async def export_success(request: Request):
-    return templates.TemplateResponse(request, "export_success.html", {"request": request})
+        return JSONResponse({"status": "success", "panels": result, "prompt": prompt})
+    
+    except Exception as e:
+        return JSONResponse({"status": "error", "error": str(e)}, status_code=500)
+
+@router.get("/generate-test")
+def generate_test(prompt: str = "superhero cat"):
+    img = generate_comic_image(prompt)
+    return {"prompt": prompt, "image": img, "status": "success"}
