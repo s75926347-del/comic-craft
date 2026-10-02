@@ -1,9 +1,36 @@
 <!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>ComicCraft FIXED</title>
-<style>body{font-family:Arial;background:#0f0f0f;color:white;padding:20px}.container{max-width:900px;margin:0 auto}h1{color:#ff6b35;text-align:center}.card{background:#1e1e1e;padding:20px;border-radius:12px;margin:20px 0}.btn{background:#ff6b35;color:white;padding:12px 24px;border:none;border-radius:8px;cursor:pointer}.success{color:#4caf50;text-align:center;font-weight:bold}</style>
+<style>body{font-family:Arial;background:#0f0f0f;color:white;padding:20px}.container{max-width:900px;margin:0 auto}h1{color:#ff6b35;text-align:center}.card{background:#1e1e1e;padding:20px;border-radius:12px;margin:20px 0}.btn{background:#ff6b35;color:white;padding:12px 24px;border:none;border-radius:8px;cursor:pointer;width:100%}.success{color:#4caf50;text-align:center;font-weight:bold} input{width:100%;padding:12px;background:#2a2a2a;color:white;border:1px solid #333;border-radius:6px;box-sizing:border-box}</style>
 </head><body><div class="container">
-<h1>🚀 ComicCraft LIVE - FIXED FINAL</h1>
-<p class="success">✅ Template Error Fixed! Working!</p>
-<div class="card"><h2>Generate Comic</h2><input id="prompt" placeholder="Brave fox in jungle" style="width:100%;padding:10px;background:#2a2a2a;color:white;border-radius:6px"><br><br><button class="btn" onclick="gen()">Generate Comic</button><div id="r" style="margin-top:20px"></div></div>
-<div class="card"><a href="/docs" style="color:#ff6b35">Go to API Docs</a> | <a href="/test-image?prompt=brave fox" style="color:#ff6b35">Test Image</a></div>
-</div><script>async function gen(){const p=document.getElementById('prompt').value;if(!p){alert('prompt podu da');return}document.getElementById('r').innerHTML='⏳ Generating... 15 sec';try{const res=await fetch('/generate-comic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p,style:'comic',num_pages:3})});const d=await res.json();document.getElementById('r').innerHTML='<pre style="background:#000;padding:15px;white-space:pre-wrap">'+JSON.stringify(d,null,2)+'</pre>'}catch(e){document.getElementById('r').innerHTML=e.message}}</script></body></html>
+<h1>🚀 ComicCraft LIVE - FINAL</h1>
+<p class="success">✅ Template Fixed! Ready!</p>
+<div class="card"><h2>Generate Comic</h2>
+<input id="prompt" placeholder="Brave fox learns cyber security" >
+<br><br>
+<button class="btn" onclick="gen()">Generate Comic 🎨</button>
+<div id="r" style="margin-top:20px"></div></div>
+<div class="card"><a href="/docs" style="color:#ff6b35">API Docs</a> | <a href="/generate-test?prompt=fox" style="color:#ff6b35">Test Image</a> | <a href="/" style="color:#ff6b35">Status</a></div>
+</div>
+<script>
+async function gen(){
+  const p=document.getElementById('prompt').value;
+  if(!p){alert('Prompt podu da!');return}
+  document.getElementById('r').innerHTML='⏳ Generating... 15 sec wait pannu...';
+  try{
+    const form = new FormData();
+    form.append('prompt', p);
+    form.append('style', 'cartoon comic');
+    const res = await fetch('/generate',{method:'POST',body:form});
+    const d = await res.json();
+    let html = `<h3>Result:</h3>`;
+    if(d.panels){
+      d.panels.forEach((panel,i)=>{
+        html += `<div style="background:#2a2a2a;padding:10px;margin:10px 0;border-radius:8px"><p><b>Panel ${i+1}:</b> ${panel.text}</p><img src="${panel.image}" style="max-width:100%;border-radius:8px" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Error'"></div>`;
+      });
+    } else {
+      html += `<pre style="background:#000;padding:15px;white-space:pre-wrap">${JSON.stringify(d,null,2)}</pre>`;
+    }
+    document.getElementById('r').innerHTML = html;
+  }catch(e){document.getElementById('r').innerHTML='Error: '+e.message}
+}
+</script></body></html>
