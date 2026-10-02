@@ -1,62 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ComicCraft - FIXED</title>
-<style>
-body { font-family: Arial, sans-serif; background:#0f0f0f; color:white; margin:0; padding:20px; }
-.container { max-width:900px; margin:0 auto; }
-h1 { color:#ff6b35; text-align:center; }
-.card { background:#1e1e1e; padding:20px; border-radius:12px; margin:20px 0; border:1px solid #333; }
-.btn { background:#ff6b35; color:white; padding:12px 24px; border:none; border-radius:8px; cursor:pointer; font-size:16px; }
-.btn:hover { background:#e55a2b; }
-a { color:#ff6b35; }
-input, textarea, select { width:100%; padding:10px; margin:10px 0; border-radius:6px; border:1px solid #444; background:#2a2a2a; color:white; }
-.success { color:#4caf50; text-align:center; font-weight:bold; }
-</style>
-</head>
-<body>
-<div class="container">
+<html><head><meta charset="UTF-8"><title>ComicCraft FIXED</title>
+<style>body{font-family:Arial;background:#0f0f0f;color:white;padding:20px}.container{max-width:900px;margin:0 auto}h1{color:#ff6b35;text-align:center}.card{background:#1e1e1e;padding:20px;border-radius:12px;margin:20px 0}.btn{background:#ff6b35;color:white;padding:12px 24px;border:none;border-radius:8px;cursor:pointer}.success{color:#4caf50;text-align:center;font-weight:bold}</style>
+</head><body><div class="container">
 <h1>🚀 ComicCraft LIVE - FIXED FINAL</h1>
-<p class="success">✅ Template Error Fixed! If you see this, deploy is WORKING!</p>
-
-<div class="card">
-<h2>Generate Comic</h2>
-<input type="text" id="prompt" placeholder="Enter your story - e.g. Brave fox in jungle">
-<select id="style">
-<option>comic</option>
-<option>manga</option>
-<option>realistic</option>
-</select>
-<button class="btn" onclick="generateComic()">Generate Comic</button>
-<div id="result" style="margin-top:20px;"></div>
-</div>
-
-<div class="card">
-<a href="/docs">Go to API Docs</a> | 
-<a href="/test-image?prompt=brave fox">Test Image (No Purple)</a>
-</div>
-</div>
-
-<script>
-async function generateComic() {
-  const prompt = document.getElementById('prompt').value;
-  const style = document.getElementById('style').value;
-  if(!prompt) { alert('Enter prompt da!'); return; }
-  document.getElementById('result').innerHTML = '⏳ Generating... 15 sec wait pannu...';
-  try {
-    const res = await fetch('/generate-comic', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({prompt: prompt, style: style, num_pages: 3})
-    });
-    const data = await res.json();
-    document.getElementById('result').innerHTML = '<pre style="white-space:pre-wrap; background:#000; padding:15px; border-radius:8px;">' + JSON.stringify(data, null, 2) + '</pre>';
-  } catch(e) {
-    document.getElementById('result').innerHTML = '❌ Error: ' + e.message;
-  }
-}
-</script>
-</body>
-</html>
+<p class="success">✅ Template Error Fixed! Working!</p>
+<div class="card"><h2>Generate Comic</h2><input id="prompt" placeholder="Brave fox in jungle" style="width:100%;padding:10px;background:#2a2a2a;color:white;border-radius:6px"><br><br><button class="btn" onclick="gen()">Generate Comic</button><div id="r" style="margin-top:20px"></div></div>
+<div class="card"><a href="/docs" style="color:#ff6b35">Go to API Docs</a> | <a href="/test-image?prompt=brave fox" style="color:#ff6b35">Test Image</a></div>
+</div><script>async function gen(){const p=document.getElementById('prompt').value;if(!p){alert('prompt podu da');return}document.getElementById('r').innerHTML='⏳ Generating... 15 sec';try{const res=await fetch('/generate-comic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p,style:'comic',num_pages:3})});const d=await res.json();document.getElementById('r').innerHTML='<pre style="background:#000;padding:15px;white-space:pre-wrap">'+JSON.stringify(d,null,2)+'</pre>'}catch(e){document.getElementById('r').innerHTML=e.message}}</script></body></html>
