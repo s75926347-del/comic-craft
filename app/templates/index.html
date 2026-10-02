@@ -1,9 +1,15 @@
 <!DOCTYPE html>
-<html><body style="background:#111;color:white;padding:30px;font-family:Arial;text-align:center">
-<h1 style="color:#ff6b35">🚀 ComicCraft LIVE - FIXED FINAL</h1>
-<h2 style="color:#4caf50">✅ Template Error Fixed!</h2>
-<p>App is working da!</p>
-<a href="/docs" style="color:#ff6b35">Go to API Docs</a><br><br>
-<input id="p" placeholder="Brave fox" style="padding:10px;width:300px"><br><br>
-<button onclick="alert('Working da! Prompt: '+document.getElementById('p').value)" style="padding:10px 20px;background:#ff6b35;color:white;border:none;border-radius:5px">Test Generate</button>
-</body></html>
+<html>
+<head><title>ComicCraft LIVE</title></head>
+<body style="background:#111;color:white;font-family:Arial;padding:40px;text-align:center">
+<h1 style="color:#ff6b35;font-size:40px">🚀 ComicCraft LIVE - FIXED!</h1>
+<h2 style="color:#4caf50">✅ Template Fixed - No Error!</h2>
+<p>App Working!</p>
+<br>
+<a href="/docs" style="color:#ff6b35;font-size:20px">Go to API Docs</a>
+<br><br>
+<input id="p" placeholder="Enter prompt - brave fox" style="padding:15px;width:300px;border-radius:8px;border:none">
+<br><br>
+<button onclick="fetch('/test-image?prompt='+document.getElementById('p').value).then(r=>r.json()).then(d=>alert(JSON.stringify(d)))" style="padding:15px 30px;background:#ff6b35;color:white;border:none;border-radius:8px;font-size:18px;cursor:pointer">Generate Test</button>
+</body>
+</html>
