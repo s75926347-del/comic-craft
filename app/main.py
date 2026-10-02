@@ -1,35 +1,38 @@
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 import os
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
 
-app = FastAPI(title="ComicCraft")
+app = FastAPI()
 
-# 1. HEALTH ONLY - / vida koodathu
-@app.api_route("/health", methods=["GET", "HEAD"])
-async def health():
+@app.get("/health")
+def health():
     return {"status": "ok"}
 
-# 2. YOUR ORIGINAL UI - FIRST LOAD
+@app.get("/ping")
+def ping():
+    return {"pong": True}
+
+@app.get("/")
+def home():
+    return {"message": "ComicCraft Live", "status": "ok"}
+
+# Try to load real app AFTER health checks
 try:
-    from app.routes import router as comic_router
-    app.include_router(comic_router)
-    print("✅ Comic router loaded - UI will be at /")
+    from app.core.routes import router as core_router
+    app.include_router(core_router)
+    print("✅ Core routes loaded")
 except Exception as e:
-    print(f"❌ Router load failed: {e}")
-    import traceback
-    traceback.print_exc()
+    print(f"⚠️ Core routes failed: {e}")
 
-# 3. Static folders
-if os.path.exists("static"):
+try:
+    from fastapi.staticfiles import StaticFiles
+    app.mount("/static", StaticFiles(directory="app/static"), name="static")
+except:
+    pass
+
+@app.get("/ui")
+def ui():
     try:
-        app.mount("/static", StaticFiles(directory="static"), name="static")
+        return FileResponse("app/templates/index.html")
     except:
-        pass
-
-if os.path.exists("app/static"):
-    try:
-        app.mount("/app_static", StaticFiles(directory="app/static"), name="app_static")
-    except:
-        pass
-
-print("✅ App startup complete")
+        return {"ui": "not found but app is live"}
