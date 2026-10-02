@@ -1,30 +1,37 @@
 <!DOCTYPE html>
 <html>
-<head><title>ComicCraft LIVE</title></head>
+<head>
+    <title>ComicCraft LIVE</title>
+    <style>body{font-family: Arial; padding: 20px}</style>
+</head>
 <body>
-<h1>ComicCraft 🚀 LIVE</h1>
-<a href="/docs">Go to API Docs</a><br><br>
-<a href="/test-image">Test Image (No Purple)</a>
-<hr>
-<form id="comicForm">
-<input type="text" id="prompt" placeholder="brave fox saves forest" style="width:300px">
-<select id="style"><option>cartoon comic</option><option>anime</option><option>realistic</option></select>
-<button type="submit">Generate 4 Panel Comic</button>
-</form>
-<div id="result" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:20px"></div>
+    <h1>ComicCraft 🚀 LIVE - FIXED</h1>
+    <a href="/docs">Go to API Docs</a><br><br>
+    <a href="/test-image">Test Image (No Purple)</a>
+    <hr>
+    <h3>Generate Comic:</h3>
+    <input type="text" id="prompt" placeholder="brave fox saves forest" style="width:300px; padding:8px">
+    <select id="style" style="padding:8px">
+        <option value="cartoon comic">cartoon comic</option>
+        <option value="anime">anime</option>
+        <option value="realistic">realistic</option>
+    </select>
+    <button onclick="generate()" style="padding:8px 15px">Generate</button>
+    
+    <div id="result" style="display:flex; gap:15px; flex-wrap:wrap; margin-top:20px"></div>
 
 <script>
-document.getElementById('comicForm').onsubmit = async (e) => {
- e.preventDefault();
- const prompt = document.getElementById('prompt').value;
- const style = document.getElementById('style').value;
- const res = await fetch(`/generate?prompt=${encodeURIComponent(prompt)}&style=${encodeURIComponent(style)}`);
- const data = await res.json();
- const div = document.getElementById('result');
- div.innerHTML = '';
- data.panels.forEach(p => {
-   div.innerHTML += `<div style="border:1px solid #ccc; padding:10px; width:200px"><img src="${p.image}" width="200"><p>${p.text}</p></div>`;
- });
+async function generate(){
+    const prompt = document.getElementById('prompt').value;
+    const style = document.getElementById('style').value;
+    document.getElementById('result').innerHTML = 'Generating...';
+    const res = await fetch(`/generate?prompt=${encodeURIComponent(prompt)}&style=${encodeURIComponent(style)}`);
+    const data = await res.json();
+    const div = document.getElementById('result');
+    div.innerHTML = '';
+    data.panels.forEach(p => {
+        div.innerHTML += `<div style="border:1px solid #ccc; padding:10px; width:200px"><img src="${p.image}" width="200"><p>${p.text}</p></div>`;
+    });
 }
 </script>
 </body>
