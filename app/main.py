@@ -4,16 +4,29 @@ import os
 
 app = FastAPI(title="ComicCraft")
 
-# 1. Health check for Render - MOST IMPORTANT
+# 1. HOME + HEALTH - Render ku mukkiyam
+@app.api_route("/", methods=["GET", "HEAD"])
+async def root():
+    return {"status": "ok", "message": "ComicCraft API Running - Go to /docs for API"}
+
 @app.api_route("/health", methods=["GET", "HEAD"])
 async def health():
     return {"status": "ok"}
 
-# 2. Mount static if exists
+# 2. Static folder
 if os.path.exists("static"):
-    app.mount("/static", StaticFiles(directory="static"), name="static")
+    try:
+        app.mount("/static", StaticFiles(directory="static"), name="static")
+    except:
+        pass
 
-# 3. Load your actual router - CORRECT IMPORT
+if os.path.exists("app/static"):
+    try:
+        app.mount("/app_static", StaticFiles(directory="app/static"), name="app_static")
+    except:
+        pass
+
+# 3. YOUR ORIGINAL ROUTES - CORRECT
 try:
     from app.routes import router as comic_router
     app.include_router(comic_router)
@@ -22,10 +35,5 @@ except Exception as e:
     print(f"❌ Router load failed: {e}")
     import traceback
     traceback.print_exc()
-
-# 4. Also mount templates static
-if os.path.exists("app/templates"):
-    # This is handled inside routes.py
-    pass
 
 print("✅ App startup complete")
