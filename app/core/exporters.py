@@ -40,8 +40,5 @@ def save_pdf(layout):
             pdf.set_xy(10, 170)
             pdf.set_font("Arial", size=12)
             pdf.multi_cell(190, 10, panel['text'])
-
-    pdf_path = "static/comic.pdf"
-    os.makedirs("static", exist_ok=True)
-    pdf.output(pdf_path)
-    return pdf_path
+                pdf.output(filename)
+    return filename   
